@@ -328,7 +328,7 @@ function FavItem({ favChat, removeFav, uniqueKey, chatProvider }: { favChat: fav
 function getProviderIcon(provider?: string): { icon: any, isImage: boolean } {
     if (!provider) return { icon: Bug, isImage: false };
     if (provider.includes('chatgpt')) return { icon: "https://chatgpt.com/favicon.ico", isImage: true };
-    if (provider.includes('gemini')) return { icon: "https://www.gstatic.com/lamda/images/gemini_favicon_f069954c85030e28.png", isImage: true };
+    if (provider.includes('gemini')) return { icon: "https://gemini.google.com/favicon.ico", isImage: true };
     if (provider.includes('claude')) return { icon: "https://claude.ai/favicon.ico", isImage: true };
     return { icon: Bug, isImage: false };
 }
