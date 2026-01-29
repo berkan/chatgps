@@ -8,8 +8,21 @@ export default function useThemeDetection() {
 
   useEffect(() => {
     const checkAndSetTheme = () => {
-      const rootElement = document.documentElement;
-      const rootBackgroundColor = window.getComputedStyle(rootElement).backgroundColor;
+      let rootElement = document.documentElement;
+      let rootBackgroundColor = window.getComputedStyle(rootElement).backgroundColor;
+
+      // Check for transparency (rgba(0, 0, 0, 0) or 'transparent')
+      if (rootBackgroundColor === 'rgba(0, 0, 0, 0)' || rootBackgroundColor === 'transparent') {
+        // Fallback to body
+        rootElement = document.body;
+        rootBackgroundColor = window.getComputedStyle(rootElement).backgroundColor;
+      }
+
+      // If still transparent, default to light mode
+      if (rootBackgroundColor === 'rgba(0, 0, 0, 0)' || rootBackgroundColor === 'transparent') {
+        setTheme("light");
+        return;
+      }
 
       // Extract RGB values
       const rgbMatch = rootBackgroundColor.match(/\d+/g);
