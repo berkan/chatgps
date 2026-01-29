@@ -1,5 +1,5 @@
 import { extractFilteredTreeBySelectors, getItemInfo, getScrollableParent, extractChatId } from "@/lib/chatgptElementUtils";
-import { SCROLL_OFFSET, SELECTOR_MAP } from "@/lib/constants";
+import { SCROLL_OFFSET, SELECTOR_MAP, chatProviders } from "@/lib/constants";
 import { ChatItem, favouritedChat } from "@/types"
 import useHighlightedIndex from "@/hooks/use-highlighted-index"
 import { StarIcon } from "lucide-react";
@@ -13,17 +13,18 @@ export default function ChatOutline(
     options,
     textFilter,
     favourites,
-    setFavourites
+    setFavourites,
+    chatProvider
   }: {
     scrollContainer: HTMLElement | null,
     options: Record<string, boolean>,
     textFilter: string,
     favourites: Record<string, favouritedChat>,
-    setFavourites: CallableFunction
+    setFavourites: CallableFunction,
+    chatProvider: chatProviders
   }
 ) {
   const [elementTree, setElementTree] = useState<ChatItem[]>([])
-  const chatProvider = useChatProvider()
   const highlightedIndex = useHighlightedIndex(scrollContainer, elementTree)
 
   const selectorMap = SELECTOR_MAP[chatProvider]
@@ -60,6 +61,7 @@ export default function ChatOutline(
         selectorMap={selectorMap}
         favourites={favourites}
         setFavourites={setFavourites}
+        chatProvider={chatProvider}
       />
     </div>
   )
@@ -71,13 +73,15 @@ function ElementDropDowns(
     highlightedIndex,
     selectorMap,
     favourites,
-    setFavourites
+    setFavourites,
+    chatProvider
   }: {
     elementTree: ChatItem[],
     highlightedIndex: number,
     selectorMap: Record<string, string>,
     favourites: Record<string, favouritedChat>,
-    setFavourites: CallableFunction
+    setFavourites: CallableFunction,
+    chatProvider: any
   }
 ) {
   if (elementTree.length === 0) {
@@ -98,6 +102,7 @@ function ElementDropDowns(
             favourites={favourites}
             setFavourites={setFavourites}
             key={"text-preview" + index}
+            chatProvider={chatProvider}
         />
       })}
     </div>
@@ -111,13 +116,15 @@ function TextPreview(
     highlighted = false,
     selectorMap,
     favourites,
-    setFavourites
+    setFavourites,
+    chatProvider
   }: {
     item: ChatItem
     highlighted: boolean
     selectorMap: Record<string, string>,
     favourites: Record<string, favouritedChat>,
-    setFavourites: CallableFunction
+    setFavourites: CallableFunction,
+    chatProvider: any
   }
 ) {
   const ref = useRef<HTMLDivElement>(null);
@@ -140,6 +147,7 @@ function TextPreview(
         selectorMap={selectorMap}
         favourites={favourites}
         setFavourites={setFavourites}
+        chatProvider={chatProvider}
         />
       {item.children.length > 0 &&
         <div className="pl-10">
@@ -151,6 +159,7 @@ function TextPreview(
             favourites={favourites}
             setFavourites={setFavourites}
             key={"preview-button" + index}
+            chatProvider={chatProvider}
           />)}
         </div>
       }
@@ -166,7 +175,8 @@ function PreviewButton(
     padding = 3,
     ref,
     favourites,
-    setFavourites
+    setFavourites,
+    chatProvider
   }: {
     item: ChatItem,
     onClick: React.MouseEventHandler<HTMLDivElement>,
@@ -174,11 +184,11 @@ function PreviewButton(
     padding?: number,
     ref?: React.Ref<HTMLDivElement>,
     favourites: Record<string, favouritedChat>,
-    setFavourites: CallableFunction
+    setFavourites: CallableFunction,
+    chatProvider: any
   }
 ) {
   const { label, icon, iconName } = getItemInfo(item, selectorMap)
-  const chatProvider = useChatProvider()
   const ItemIcon = icon
 
   // Favourite Logic

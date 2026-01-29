@@ -21,5 +21,17 @@ export function useSyncedStorage<T>(key: string, defaultValue: T) {
     storage.setItem(`local:${key}`, value)
   }, [key, value]);
 
+  // Listen for changes from other tabs/contexts
+  useEffect(() => {
+     const unwatch = storage.watch(`local:${key}`, (newValue) => {
+        if (newValue !== undefined && newValue !== null) {
+            setValue(newValue as T);
+        }
+     });
+     return () => {
+        unwatch();
+     }
+  }, [key]);
+
   return [value, setValue] as const;
 }

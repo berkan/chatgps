@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import icon from "@/assets/icon.png"
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Bug, ChevronDown, ChevronUp, Filter, X, ExternalLink, StarIcon, Copy, Download, Bot, Sparkles, Brain } from "lucide-react";
+import { Bug, ChevronDown, ChevronUp, Filter, X, ExternalLink, StarIcon, Copy, Download } from "lucide-react";
 import ChatOutline from "@/components/chat-outline";
 import useThemeDetection from "@/hooks/use-theme-detection";
 import useScrollContainer from "@/hooks/use-scroll-container";
@@ -201,7 +201,7 @@ export default function App() {
                 className={cn("flex-1 p-2 text-sm font-medium border-b-2 transition-colors cursor-pointer", activeTab === 'outline' ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground")}
                 onClick={() => setActiveTab('outline')}
             >
-                Minimap
+                Chat outline
             </button>
             <button
                 className={cn("flex-1 p-2 text-sm font-medium border-b-2 transition-colors cursor-pointer", activeTab === 'favorites' ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground")}
@@ -220,6 +220,7 @@ export default function App() {
             textFilter={textFilter}
             favourites={favourites}
             setFavourites={setFavourites}
+            chatProvider={chatProvider}
           />
         ) : (
             <div className="w-full h-full flex flex-col">
@@ -265,9 +266,9 @@ function FavItem({ favChat, removeFav, uniqueKey, chatProvider }: { favChat: fav
     if (!isOnPage) {
        // If we have a stored URL, use it. Otherwise construct one (fallback).
        if (favChat.url) {
-         window.location.href = favChat.url
+         window.open(favChat.url, "_blank")
        } else {
-         window.open(`https://chat.com/c/${favChat.chatId}`, "_self")
+         window.open(`https://chat.com/c/${favChat.chatId}`, "_blank")
        }
        return
     }
@@ -278,7 +279,7 @@ function FavItem({ favChat, removeFav, uniqueKey, chatProvider }: { favChat: fav
     }
   }
 
-  const ProviderIcon = getProviderIcon(favChat.provider)
+  const { icon: ProviderIcon, isImage } = getProviderIcon(favChat.provider)
 
   return (
     <TooltipProvider>
@@ -289,8 +290,12 @@ function FavItem({ favChat, removeFav, uniqueKey, chatProvider }: { favChat: fav
             onClick={goToFav}
           >
             {!isOnPage && <ExternalLink size={12} />}
-            <div className="shrink-0" title={favChat.provider || "Unknown Provider"}>
-               <ProviderIcon size={12} />
+            <div className="shrink-0 flex items-center justify-center size-3" title={favChat.provider || "Unknown Provider"}>
+               {isImage ? (
+                  <img src={ProviderIcon} className="w-full h-full object-contain" />
+               ) : (
+                  <ProviderIcon size={12} />
+               )}
             </div>
             <span className="text-xs truncate select-none flex-1">
               {favChat.preview}
@@ -311,7 +316,7 @@ function FavItem({ favChat, removeFav, uniqueKey, chatProvider }: { favChat: fav
             </Button>
           </div>
         </TooltipTrigger>
-        <TooltipContent side="left" className="max-w-[250px] break-words">
+        <TooltipContent side="left" className="max-w-[250px] break-words bg-popover text-popover-foreground shadow-md z-[99999]" sideOffset={10} avoidCollisions={true}>
            {favChat.title && <div className="font-bold text-xs mb-1 border-b pb-1">{favChat.title}</div>}
            <div className="text-xs">{favChat.preview}</div>
         </TooltipContent>
@@ -320,10 +325,10 @@ function FavItem({ favChat, removeFav, uniqueKey, chatProvider }: { favChat: fav
   )
 }
 
-function getProviderIcon(provider?: string) {
-    if (!provider) return Bug;
-    if (provider.includes('chatgpt')) return Bot;
-    if (provider.includes('gemini')) return Sparkles;
-    if (provider.includes('claude')) return Brain;
-    return Bug;
+function getProviderIcon(provider?: string): { icon: any, isImage: boolean } {
+    if (!provider) return { icon: Bug, isImage: false };
+    if (provider.includes('chatgpt')) return { icon: "https://chatgpt.com/favicon.ico", isImage: true };
+    if (provider.includes('gemini')) return { icon: "https://www.gstatic.com/lamda/images/gemini_favicon_f069954c85030e28.png", isImage: true };
+    if (provider.includes('claude')) return { icon: "https://claude.ai/favicon.ico", isImage: true };
+    return { icon: Bug, isImage: false };
 }
