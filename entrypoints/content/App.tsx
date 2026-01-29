@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import icon from "@/assets/icon.png"
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Bug, ChevronDown, ChevronUp, Filter, X, ExternalLink, StarIcon, Copy, Download } from "lucide-react";
+import { Bug, ChevronDown, ChevronUp, Filter, X, ExternalLink, StarIcon, Copy, Download, Bot, Sparkles, Brain } from "lucide-react";
 import ChatOutline from "@/components/chat-outline";
 import useThemeDetection from "@/hooks/use-theme-detection";
 import useScrollContainer from "@/hooks/use-scroll-container";
@@ -14,6 +14,7 @@ import useChatProvider from "@/hooks/use-chat-provider";
 import { useSyncedStorage } from "@/hooks/use-synced-storage";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const DEFAULT_FILTERS = {
     "user": true,
@@ -260,43 +261,69 @@ export default function App() {
 function FavItem({ favChat, removeFav, uniqueKey, chatProvider }: { favChat: favouritedChat, removeFav: CallableFunction, uniqueKey: string, chatProvider: any }) {
   const isOnPage = extractChatId(window.location.href) == favChat.chatId
 
-  function goToFav() {
+  function goToFav(e: React.MouseEvent) {
     if (!isOnPage) {
-      window.open(`https://chat.com/c/${favChat.chatId}`, "_self")
-      return
+       // If we have a stored URL, use it. Otherwise construct one (fallback).
+       if (favChat.url) {
+         window.location.href = favChat.url
+       } else {
+         window.open(`https://chat.com/c/${favChat.chatId}`, "_self")
+       }
+       return
     }
+    // If we are on the page, scroll to the position.
     const scrollContainer = queryChatScrollContainer(chatProvider)
     if (scrollContainer) {
       scrollContainer.scrollTo(0, favChat.scrollTop)
     }
   }
 
-  const FavChatIcon = ICON_MAP[favChat.iconName] || Bug // Fallback icon
+  const ProviderIcon = getProviderIcon(favChat.provider)
 
   return (
-      <div
-        className={cn("group flex items-center gap-1 p-2 hover:bg-muted relative cursor-pointer", isOnPage && "pl-4 border-l-2 border-primary")}
-        onClick={goToFav}
-      >
-        {!isOnPage && <ExternalLink size={12} />}
-        <FavChatIcon size={12} />
-        <span className="text-xs truncate select-none flex-1">
-          {favChat.preview}
-        </span>
-        <Button
-            variant="ghost"
-            size="sm"
-            className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-            onClick={(e) => {
-                e.stopPropagation();
-                removeFav(uniqueKey);
-            }}
+    <TooltipProvider>
+      <Tooltip delayDuration={300}>
+        <TooltipTrigger asChild>
+          <div
+            className={cn("group flex items-center gap-1 p-2 hover:bg-muted relative cursor-pointer", isOnPage && "pl-4 border-l-2 border-primary")}
+            onClick={goToFav}
           >
-            <StarIcon
-                className="h-3 w-3"
-                fill="#01FFA7"
-            />
-        </Button>
-      </div>
+            {!isOnPage && <ExternalLink size={12} />}
+            <div className="shrink-0" title={favChat.provider || "Unknown Provider"}>
+               <ProviderIcon size={12} />
+            </div>
+            <span className="text-xs truncate select-none flex-1">
+              {favChat.preview}
+            </span>
+            <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    removeFav(uniqueKey);
+                }}
+              >
+                <StarIcon
+                    className="h-3 w-3"
+                    fill="#01FFA7"
+                />
+            </Button>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent side="left" className="max-w-[250px] break-words">
+           {favChat.title && <div className="font-bold text-xs mb-1 border-b pb-1">{favChat.title}</div>}
+           <div className="text-xs">{favChat.preview}</div>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   )
+}
+
+function getProviderIcon(provider?: string) {
+    if (!provider) return Bug;
+    if (provider.includes('chatgpt')) return Bot;
+    if (provider.includes('gemini')) return Sparkles;
+    if (provider.includes('claude')) return Brain;
+    return Bug;
 }

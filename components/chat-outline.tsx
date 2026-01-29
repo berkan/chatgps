@@ -178,6 +178,7 @@ function PreviewButton(
   }
 ) {
   const { label, icon, iconName } = getItemInfo(item, selectorMap)
+  const chatProvider = useChatProvider()
   const ItemIcon = icon
 
   // Favourite Logic
@@ -210,11 +211,14 @@ function PreviewButton(
             return newFavs
         })
      } else {
-         const newFavourite = {
+         const newFavourite: favouritedChat = {
             chatId: chatId,
             scrollTop: scrollPos,
             preview: label,
             iconName: iconName,
+            url: window.location.href,
+            title: document.title,
+            provider: chatProvider,
          }
          setFavourites((old: Record<string, favouritedChat>) => {
             return {
