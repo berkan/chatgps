@@ -8,6 +8,9 @@ export interface favouritedChat {
   chatId: string,
   scrollTop: number,
   preview: string,
+  url?: string,
+  title?: string,
+  provider?: string,
 }
 
 
