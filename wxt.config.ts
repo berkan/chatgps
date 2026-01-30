@@ -8,6 +8,12 @@ export default defineConfig({
   manifest: {
     name: "Chat GPS: chat outline for navigating Chat GPT",
     permissions: ['storage'],
+    web_accessible_resources: [
+      {
+        resources: ["favorites.html"],
+        matches: ["<all_urls>"],
+      },
+    ],
     "commands": {
       "toggle-ui": {
         "suggested_key": {
